@@ -34,9 +34,6 @@ aAll = {};
         aAll(i,:)=dayData;%Add day to full list
         t=aAll{i,2};
         
-        if max(size(bData)) ~= length(t) && max(size(bData)) > 0
-            error('ERROR: Day %i, Group A is missing some data, day %i had %i elements but day %i had %i',i,i-1,max(size(bData)),length(t));
-        end
         %add each day as column of data
         aData(:,i) = t';
         
@@ -68,11 +65,9 @@ bAll = {};
         t=bAll{i,2};
         
         %add each day as column of data
-        if max(size(bData)) ~= length(t) && max(size(bData)) > 0
-            error('ERROR: Day %i, Group B is missing some data, day %i had %i elements but day %i had %i',i,i-1,max(size(bData)),i,length(t));
-        end
+        if max(size(bData)) != length(t)
+            print('ERROR: Day %i, Group B is missing some data, cannot p
         bData(:,i) = t';
-        
         
     end
 
