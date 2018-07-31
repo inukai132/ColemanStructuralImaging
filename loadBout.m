@@ -11,7 +11,9 @@ function [ o ] = loadBout(path, files, dayLab, grpLab)
     end
     for i=1:length(files)
         d = load([path files{i}]);
-        l = {files{i}(1:13)};
+        l = files(i);
+        l={l{1}(1:end-12)};
+        l=strrep(l,sprintf('b%s',dayLab),'');
         td=[td double(d.bout_areas)];
         for j=1:length(d.bout_areas)
             tl=[tl l];
