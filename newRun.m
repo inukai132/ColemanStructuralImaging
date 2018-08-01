@@ -326,21 +326,9 @@ for day=1:4
     title(t);
 end
 
-saveFolder = 0;
-% saveFolder = uigetdir('.','Choose a folder to save the figures');
-figs = findobj(allchild(0), 'flat', 'Type', 'figure');
-for fig_i = 1:length(figs)
-    h = figs(fig_i);
-    if saveFolder ~= 0
-        n = get(h, 'Name');
-        n = strrep(n,' ','_');
-        saveas(h, fullfile(saveFolder, n));
-        saveas(h, fullfile(saveFolder, n), 'epsc');
-    end
-    close(h)
-end
 
-%Population correlations
+    %% Population correlations
+    
 aGroups = unique(upper(aAll{1,1})); %Gets the names of the groups
 figure('name', 'Mean activity across all days');
 title('Means Normalized to Day -3');
@@ -426,13 +414,30 @@ for group_i = 1:length(bGroups)
     end
     plot(x,y,'-o','Color',[1 .8 .8],'MarkerSize',10,'LineWidth',2);
 end
-%Get the mean of the means and add as bar
+%Get the var of the entire group and add as bar
 v = var(cell2mat(bAll(:,2)),0,2)./bVar;
 bar(x,v,'FaceAlpha',0.1,'LineWidth',2,'FaceColor',[1 0 0]);
 
 plot(0:9,ones(1,10),'k--')
 set(gca,'XTickLabel',[' ',DAYLAB,' ',DAYLAB])
 hold off;
+
+    %% Save figures
+
+% saveFolder = 0;
+saveFolder = uigetdir('.','Choose a folder to save the figures');
+figs = findobj(allchild(0), 'flat', 'Type', 'figure');
+for fig_i = 1:length(figs)
+    h = figs(fig_i);
+    if saveFolder ~= 0
+        n = get(h, 'Name');
+        n = strrep(n,' ','_');
+        saveas(h, fullfile(saveFolder, n));
+        saveas(h, fullfile(saveFolder, n), 'epsc');
+    end
+    close(h)
+end
+
 
 
 
