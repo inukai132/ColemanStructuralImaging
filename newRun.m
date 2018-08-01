@@ -193,9 +193,9 @@ b_epb_sizegroup = bMD0_ind_largeEPB;
 
 for i = 1:3
     figure('name',sprintf('Size change (%s to %s) - a v b LRG EPB',DAYLAB{1},DAYLAB{i+1}));
-    cumplot(ma(a_epb_sizegroup,i), 'bo');
+    cumplot(ma(a_epb_sizegroup,i), 'b');
     hold on
-    cumplot(mb(b_epb_sizegroup,i), 'ro')
+    cumplot(mb(b_epb_sizegroup,i), 'r')
     t=sprintf('Size change (%s --> %s) - a v b | LRG EPBs',DAYLAB{1},DAYLAB{i+1});
     
     [h,p]=kstest2(ma(a_epb_sizegroup,i), mb(b_epb_sizegroup,i));
@@ -211,9 +211,9 @@ b_epb_sizegroup = bMD0_ind_midEPB;
 
 for i = 1:3
     figure('name',sprintf('Size change (%s to %s) - a v b MED EPB',DAYLAB{1},DAYLAB{i+1}));
-    cumplot(ma(a_epb_sizegroup,i), 'bo');
+    cumplot(ma(a_epb_sizegroup,i), 'b');
     hold on
-    cumplot(mb(b_epb_sizegroup,i), 'ro')
+    cumplot(mb(b_epb_sizegroup,i), 'r')
     t=sprintf('Size change (%s --> %s) - a v b | MED EPBs',DAYLAB{1},DAYLAB{i+1});
     
     [h,p]=kstest2(ma(a_epb_sizegroup,i), mb(b_epb_sizegroup,i));
@@ -229,9 +229,9 @@ b_epb_sizegroup = bMD0_ind_smallEPB;
 
 for i = 1:3
     figure('name',sprintf('Size change (%s to %s) - a v b SML EPB',DAYLAB{1},DAYLAB{i+1}));
-    cumplot(ma(a_epb_sizegroup,i), 'bo');
+    cumplot(ma(a_epb_sizegroup,i), 'b');
     hold on
-    cumplot(mb(b_epb_sizegroup,i), 'ro')
+    cumplot(mb(b_epb_sizegroup,i), 'r')
     t=sprintf('Size change (%s --> %s) - a v b | SML EPBs',DAYLAB{1},DAYLAB{i+1});
     
     [h,p]=kstest2(ma(a_epb_sizegroup,i), mb(b_epb_sizegroup,i));
@@ -326,14 +326,122 @@ for day=1:4
     title(t);
 end
 
-saveFolder = uigetdir('.','Choose a folder to save the figures');
-if saveFolder ~= 0
-    figs = findobj(allchild(0), 'flat', 'Type', 'figure');
-    for fig_i = 1:length(figs)
-        h = figs(fig_i);
+saveFolder = 0;
+% saveFolder = uigetdir('.','Choose a folder to save the figures');
+figs = findobj(allchild(0), 'flat', 'Type', 'figure');
+for fig_i = 1:length(figs)
+    h = figs(fig_i);
+    if saveFolder ~= 0
         n = get(h, 'Name');
         n = strrep(n,' ','_');
         saveas(h, fullfile(saveFolder, n));
         saveas(h, fullfile(saveFolder, n), 'epsc');
     end
+    close(h)
 end
+
+%Population correlations
+aGroups = unique(upper(aAll{1,1})); %Gets the names of the groups
+figure('name', 'Mean activity across all days');
+title('Means Normalized to Day -3');
+aMean = mean(aAll{1,2});
+m=zeros(1,DAYS);
+hold on;
+for group_i = 1:length(aGroups)
+    %Get mean across the days, normalized to day 0(-3)
+    x=0:3;
+    data_i = ismember(upper(aAll{1,1}),aGroups(group_i));
+    %Plot the means in a light color across the days (0-3)
+    y=zeros(1,DAYS);
+    for day_i = 1:DAYS
+        data = aAll{day_i,2}(data_i);
+        y(day_i)=mean(data)/aMean;
+        m(day_i)=m(day_i)+sum(data);
+    end
+    plot(x,y,'-o','Color',[.8 .8 1],'MarkerSize',10,'LineWidth',2);
+end
+%Get the mean of the means and add as bar
+m = m./length(aAll{1,2})./aMean;
+bar(x,m,'FaceAlpha',0.1,'LineWidth',2);
+
+%Do the same for group b (4-7)
+bGroups = unique(upper(bAll{1,1})); %Gets the names of the groups
+bMean = mean(bAll{1,2});
+m=zeros(1,DAYS);
+hold on;
+for group_i = 1:length(bGroups)
+    %Get mean across the days, normalized to day 0(-3)
+    x=5:8;
+    data_i = ismember(upper(bAll{1,1}),bGroups(group_i));
+    %Plot the means in a light color across the days (0-3)
+    y=zeros(1,DAYS);
+    for day_i = 1:DAYS
+        data = bAll{day_i,2}(data_i);
+        y(day_i)=mean(data)/bMean;
+        m(day_i)=m(day_i)+sum(data);
+    end
+    plot(x,y,'-o','Color',[1 .8 .8],'MarkerSize',10,'LineWidth',2);
+end
+%Get the mean of the means and add as bar
+m = m./length(bAll{1,2})./bMean;
+bar(x,m,'FaceAlpha',0.1,'LineWidth',2,'FaceColor',[1 0 0]);
+plot(0:9,ones(1,10),'k--')
+set(gca,'XTickLabel',[' ',DAYLAB,' ',DAYLAB])
+hold off;
+
+
+%Repeat with variance
+figure('name', 'Activity variance across all days');
+title('Variance Normalized to Day -3');
+aVar = var(aAll{1,2});
+hold on;
+for group_i = 1:length(aGroups)
+    %Get variance across the days, normalized to day 0(-3)
+    x=0:3;
+    data_i = ismember(upper(aAll{1,1}),aGroups(group_i));
+    %Plot the variances in a light color across the days (0-3)
+    y=zeros(1,DAYS);
+    for day_i = 1:DAYS
+        data = aAll{day_i,2}(data_i);
+        y(day_i)=var(data)/aVar;
+    end
+    plot(x,y,'-o','Color',[.8 .8 1],'MarkerSize',10,'LineWidth',2);
+end
+%Get the var of the entire group and add as bar
+v = var(cell2mat(aAll(:,2)),0,2)./aVar;
+bar(x,v,'FaceAlpha',0.1,'LineWidth',2);
+
+%Do the same for group b (4-7)
+bVar = var(bAll{1,2});
+hold on;
+for group_i = 1:length(bGroups)
+    %Get variance across the days, normalized to day 0(-3)
+    x=5:8;
+    data_i = ismember(upper(bAll{1,1}),bGroups(group_i));
+    %Plot the variances in a light color across the days (5-8)
+    y=zeros(1,DAYS);
+    for day_i = 1:DAYS
+        data = bAll{day_i,2}(data_i);
+        y(day_i)=var(data)/bVar;
+    end
+    plot(x,y,'-o','Color',[1 .8 .8],'MarkerSize',10,'LineWidth',2);
+end
+%Get the mean of the means and add as bar
+v = var(cell2mat(bAll(:,2)),0,2)./bVar;
+bar(x,v,'FaceAlpha',0.1,'LineWidth',2,'FaceColor',[1 0 0]);
+
+plot(0:9,ones(1,10),'k--')
+set(gca,'XTickLabel',[' ',DAYLAB,' ',DAYLAB])
+hold off;
+
+
+
+
+
+
+
+
+
+
+
+
