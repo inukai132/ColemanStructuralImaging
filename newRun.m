@@ -4,10 +4,14 @@ aData=[];
 bData=[];
 aAll=cell(0,0);
 bAll=cell(0,0);
-
+legendNames={'Group A','Group B'};
 TestDataA={'aDay1','aDay2','aDay3','aDay4'};
 TestDataB={'bDay1','bDay2','bDay3','bDay4'};
 TESTING=1;
+PARALLEL=0;
+close all;
+%%NOTE: the MATLAB command `close all` will close all open figures
+
 %Setup Testing Data% 
 %% load grpA 
 
@@ -178,12 +182,14 @@ for i = 1:3
     cumplot(ma(:,i), 'b');
     hold on
     cumplot(mb(:,i), 'r')
+    xlim([-1 1]);
     t=sprintf('Size change (%s --> %s) - a v b',DAYLAB{1},DAYLAB{i+1});
     
     [h,p]=kstest2(ma(:,i), mb(:,i));
     
     
-    title([t 'p=' num2str(p)])
+    title([t ' p=' num2str(p)])
+    legend(legendNames);
 end
 
 %% a v b - large EPBs
@@ -196,12 +202,14 @@ for i = 1:3
     cumplot(ma(a_epb_sizegroup,i), 'b');
     hold on
     cumplot(mb(b_epb_sizegroup,i), 'r')
+    xlim([-1 1]);
     t=sprintf('Size change (%s --> %s) - a v b | LRG EPBs',DAYLAB{1},DAYLAB{i+1});
     
     [h,p]=kstest2(ma(a_epb_sizegroup,i), mb(b_epb_sizegroup,i));
     
     
-    title([t 'p=' num2str(p)])
+    title([t ' p=' num2str(p)])
+    legend(legendNames);
 end
 
 %% a v b - med EPBs
@@ -214,12 +222,14 @@ for i = 1:3
     cumplot(ma(a_epb_sizegroup,i), 'b');
     hold on
     cumplot(mb(b_epb_sizegroup,i), 'r')
+    xlim([-1 1]);
     t=sprintf('Size change (%s --> %s) - a v b | MED EPBs',DAYLAB{1},DAYLAB{i+1});
     
     [h,p]=kstest2(ma(a_epb_sizegroup,i), mb(b_epb_sizegroup,i));
     
     
-    title([t 'p=' num2str(p)])
+    title([t ' p=' num2str(p)])
+    legend(legendNames);
 end
 
 %% a v b - small EPBs
@@ -232,17 +242,19 @@ for i = 1:3
     cumplot(ma(a_epb_sizegroup,i), 'b');
     hold on
     cumplot(mb(b_epb_sizegroup,i), 'r')
+    xlim([-1 1]);
     t=sprintf('Size change (%s --> %s) - a v b | SML EPBs',DAYLAB{1},DAYLAB{i+1});
     
     [h,p]=kstest2(ma(a_epb_sizegroup,i), mb(b_epb_sizegroup,i));
     
     
-    title([t 'p=' num2str(p)])
+    title([t ' p=' num2str(p)])
+    legend(legendNames);
 end
 
 
 
-%% plots deltaSize
+%% plots deltaSize compare to -3
 
     for i=1:3
         figure('name',sprintf('Size change (%s to %s) - a v b',DAYLAB{1},DAYLAB{i+1}));
@@ -252,7 +264,7 @@ end
         H=cdfplot(ma(:,i));
     %     set(H,'Marker','o');
     %     set(H,'LineStyle','none');
-        H.Color='r';
+        H.Color='b';
         Ax=H.XData;
         Ax(1)=-.5;
         Ax(end)=.5;
@@ -265,9 +277,10 @@ end
         sumA=cumtrapz(Ax,Ay);
         hold on;
         H=cdfplot(mb(:,i));
+        legend(legendNames);
     %     set(H,'Marker','o');
     %     set(H,'LineStyle','none');
-        H.Color='b';
+        H.Color='r';
         Bx=H.XData;
         Bx(1)=-.5;
         Bx(end)=.5;
@@ -280,7 +293,7 @@ end
         sumB=cumtrapz(Bx,By);
         title(t);
         ylim([0 1]);
-        xlim([-.5 .5]);
+        xlim([-1 1]);
         subplot(2,1,2);
         if length(sumA) > length(sumB)
             sumB=interp1(Bx,sumB,Ax);
@@ -293,15 +306,70 @@ end
         hold on;
         plot(zeros(size(sumA)),'k')
         plot(-.5:1/(length(df)-1):.5,df)
-        ylim([0 2]);
         title('Cumulative difference |a-b|');
+        ylim([-.04 0.02]);
+    end
+%% plots deltaSize compare to next day
+
+    for i=2:3
+        figure('name',sprintf('Size change (%s to %s) - a v b',DAYLAB{i},DAYLAB{i+1}));
+        subplot(2,1,1);
+        hold off;
+        t=sprintf('Size change (%s --> %s) - a v b',DAYLAB{i},DAYLAB{i+1});
+        H=cdfplot(ma(:,i));
+    %     set(H,'Marker','o');
+    %     set(H,'LineStyle','none');
+        H.Color='b';
+        Ax=H.XData;
+        Ax(1)=-.5;
+        Ax(end)=.5;
+        [~,ia,~]=unique(Ax);
+        Ax=Ax(ia);
+        Ay=H.YData;
+        Ay=Ay(ia);
+        H.XData=Ax;
+        H.YData=Ay;
+        sumA=cumtrapz(Ax,Ay);
+        hold on;
+        H=cdfplot(mb(:,i));
+        legend(legendNames);
+    %     set(H,'Marker','o');
+    %     set(H,'LineStyle','none');
+        H.Color='r';
+        Bx=H.XData;
+        Bx(1)=-.5;
+        Bx(end)=.5;
+        [~,ia,~]=unique(Bx);
+        Bx=Bx(ia);
+        By=H.YData;
+        By=By(ia);
+        H.XData = Bx;
+        H.YData = By;
+        sumB=cumtrapz(Bx,By);
+        title(t);
+        ylim([0 1]);
+        xlim([-1 1]);
+        subplot(2,1,2);
+        if length(sumA) > length(sumB)
+            sumB=interp1(Bx,sumB,Ax);
+        elseif length(sumA) < length(sumB)
+            sumA=interp1(Ax,sumA,Bx);
+        end
+        hold off;
+        df = sumA-sumB;
+        area(df);
+        hold on;
+        plot(zeros(size(sumA)),'k')
+        plot(-.5:1/(length(df)-1):.5,df)
+        title('Cumulative difference |a-b|');
+        ylim([-.04 0.02]);
     end
 
+    %% histograms - size
     BINWIDTH=5;
     BINLIM=[0 90];
     BINX=BINLIM(1):BINWIDTH:BINLIM(2)-BINWIDTH;
 
-    %% histograms - size
 
 for day=1:4
     figure('name', sprintf('Bouton Histogram Day %s',DAYLAB{day}));
@@ -311,7 +379,7 @@ for day=1:4
     dist=fitdist(aData(:,day),'Kernel','BandWidth',5);
     kernel=pdf(dist,BINX);
     hold on;
-    plot(BINX,kernel/sum(kernel), 'r-', 'LineWidth',2);
+    plot(BINX,kernel/sum(kernel), 'b-', 'LineWidth',2);
     t=sprintf('Bouton Size Day %s Group A',DAYLAB{day});
     title(t);
     
@@ -326,6 +394,63 @@ for day=1:4
     title(t);
 end
 
+    %% histograms - size - grouped
+BINWIDTH=5;
+BINLIM=[0 90];
+LIMY=[0 .3];
+BINX=BINLIM(1):BINWIDTH:BINLIM(2)-BINWIDTH;
+
+    
+aPre = [aData(:,1); aData(:,2)];
+aPost = [aData(:,3); aData(:,4)];
+bPre = [bData(:,1); bData(:,2)];
+bPost = [bData(:,3); bData(:,4)];
+
+figure('name', sprintf('Bouton Histogram Pre-dep'));
+subplot(2,1,1);
+hold off;
+histogram(aPre,'BinWidth',BINWIDTH,'BinLimits',BINLIM,'normalization','probability');
+dist=fitdist(aPre,'Kernel','BandWidth',5);
+kernel=pdf(dist,BINX);
+hold on;
+plot(BINX,kernel/sum(kernel), 'b-', 'LineWidth',2);
+t=sprintf('Bouton Size Pre-dep Group A');
+title(t);
+ylim(LIMY);
+
+subplot(2,1,2);
+hold off;
+histogram(bPre,'BinWidth',BINWIDTH,'BinLimits',BINLIM,'normalization','probability');
+dist=fitdist(bPre,'Kernel','BandWidth',5);
+kernel=pdf(dist,BINX);
+hold on;
+plot(BINX,kernel/sum(kernel), 'r-', 'LineWidth',2);
+t=sprintf('Bouton Size Pre-dep Group B');
+title(t);
+ylim(LIMY);
+
+figure('name', sprintf('Bouton Histogram Post-dep'));
+subplot(2,1,1);
+hold off;
+histogram(aPost,'BinWidth',BINWIDTH,'BinLimits',BINLIM,'normalization','probability');
+dist=fitdist(aPost,'Kernel','BandWidth',5);
+kernel=pdf(dist,BINX);
+hold on;
+plot(BINX,kernel/sum(kernel), 'b-', 'LineWidth',2);
+t=sprintf('Bouton Size Post-dep Group A');
+title(t);
+ylim(LIMY);
+
+subplot(2,1,2);
+hold off;
+histogram(bPost,'BinWidth',BINWIDTH,'BinLimits',BINLIM,'normalization','probability');
+dist=fitdist(bPost,'Kernel','BandWidth',5);
+kernel=pdf(dist,BINX);
+hold on;
+plot(BINX,kernel/sum(kernel), 'r-', 'LineWidth',2);
+t=sprintf('Bouton Size Post-dep Group B');
+title(t);
+ylim(LIMY);
 
     %% Population correlations
     
@@ -350,7 +475,7 @@ for group_i = 1:length(aGroups)
 end
 %Get the mean of the means and add as bar
 m = m./length(aAll{1,2})./aMean;
-bar(x,m,'FaceAlpha',0.1,'LineWidth',2);
+ba = bar(x,m,'FaceAlpha',0.1,'LineWidth',2);
 
 %Do the same for group b (4-7)
 bGroups = unique(upper(bAll{1,1})); %Gets the names of the groups
@@ -372,9 +497,10 @@ for group_i = 1:length(bGroups)
 end
 %Get the mean of the means and add as bar
 m = m./length(bAll{1,2})./bMean;
-bar(x,m,'FaceAlpha',0.1,'LineWidth',2,'FaceColor',[1 0 0]);
+bb = bar(x,m,'FaceAlpha',0.1,'LineWidth',2,'FaceColor',[1 0 0]);
 plot(0:9,ones(1,10),'k--')
 set(gca,'XTickLabel',[' ',DAYLAB,' ',DAYLAB])
+legend([ba(1) bb(1)], legendNames);
 hold off;
 
 
@@ -397,7 +523,7 @@ for group_i = 1:length(aGroups)
 end
 %Get the var of the entire group and add as bar
 v = var(cell2mat(aAll(:,2)),0,2)./aVar;
-bar(x,v,'FaceAlpha',0.1,'LineWidth',2);
+ba = bar(x,v,'FaceAlpha',0.1,'LineWidth',2);
 
 %Do the same for group b (4-7)
 bVar = var(bAll{1,2});
@@ -416,10 +542,11 @@ for group_i = 1:length(bGroups)
 end
 %Get the var of the entire group and add as bar
 v = var(cell2mat(bAll(:,2)),0,2)./bVar;
-bar(x,v,'FaceAlpha',0.1,'LineWidth',2,'FaceColor',[1 0 0]);
+bb = bar(x,v,'FaceAlpha',0.1,'LineWidth',2,'FaceColor',[1 0 0]);
 
 plot(0:9,ones(1,10),'k--')
 set(gca,'XTickLabel',[' ',DAYLAB,' ',DAYLAB])
+legend([ba(1) bb(1)], legendNames);
 hold off;
 
     %% Save figures
@@ -427,18 +554,31 @@ hold off;
 % saveFolder = 0;
 saveFolder = uigetdir('.','Choose a folder to save the figures');
 figs = findobj(allchild(0), 'flat', 'Type', 'figure');
-for fig_i = 1:length(figs)
-    h = figs(fig_i);
-    if saveFolder ~= 0
-        n = get(h, 'Name');
-        n = strrep(n,' ','_');
-        saveas(h, fullfile(saveFolder, n));
-        saveas(h, fullfile(saveFolder, n), 'epsc');
+if PARALLEL==1
+    parfor fig_i = 1:length(figs)
+        h = figs(fig_i);
+        if saveFolder ~= 0
+            n = get(h, 'Name');
+            n = strrep(n,' ','_');
+            saveas(h, fullfile(saveFolder, n));
+            saveas(h, fullfile(saveFolder, n), 'epsc');
+            saveas(h, fullfile(saveFolder, n), 'png');
+        end
     end
-    close(h)
+    close all;
+else
+    for fig_i = 1:length(figs)
+        h = figs(fig_i);
+        if saveFolder ~= 0
+            n = get(h, 'Name');
+            n = strrep(n,' ','_');
+            saveas(h, fullfile(saveFolder, n));
+            saveas(h, fullfile(saveFolder, n), 'epsc');
+            saveas(h, fullfile(saveFolder, n), 'png');
+        end
+        close(h);
+    end
 end
-
-
 
 
 
