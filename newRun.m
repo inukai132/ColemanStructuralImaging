@@ -549,6 +549,74 @@ set(gca,'XTickLabel',[' ',DAYLAB,' ',DAYLAB])
 legend([ba(1) bb(1)], legendNames);
 hold off;
 
+%% Difference plots
+BINCOUNT = 10;
+figure('name','Size Bins Day -3')
+subplot(2,1,1);
+[aBin0, aEdge] = histcounts(aData(:,1),BINCOUNT);
+[bBin0, bEdge] = histcounts(bData(:,1),BINCOUNT);
+bar(aBin0,'b');
+set(gca,'XTickLabels',aEdge);
+title('Size Bins Day -3')
+ylabel('Count');
+subplot(2,1,2);
+bar(bBin0,'r');
+set(gca,'XTickLabels',aEdge)
+ylabel('Count');
+
+figure('name','Size Bins Day 7')
+subplot(2,1,1);
+[aBin3, aEdge] = histcounts(aData(:,4),aEdge);
+[bBin3, bEdge] = histcounts(bData(:,4),bEdge);
+bar(aBin3,'b');
+set(gca,'XTickLabels',aEdge);
+title('Size Bins Day 7')
+ylabel('Count');
+subplot(2,1,2);
+bar(bBin3,'r');
+set(gca,'XTickLabels',aEdge)
+ylabel('Count');
+
+figure('name','Difference Bins')
+subplot(2,1,1);
+bar((aBin3-aBin0)./aBin0*100,'b');
+set(gca,'XTickLabels',aEdge);
+title('Difference in Counts between Day -3 and 7')
+ylabel('Percent Change');
+subplot(2,1,2);
+bar((bBin3-bBin0)./bBin0*100,'r');
+set(gca,'XTickLabels',aEdge)
+ylabel('Percent Change');
+
+%% Normalized change in size
+figure('name','Rate of Change vs Size')
+hold on;
+line([0 0],[-100 100],'LineStyle','--','color',[.7 .7 .7]);
+line([-100 100],[0 0],'LineStyle','--','color',[.7 .7 .7]);
+%Get average rate of change in each bouton. ((day3-day0)/10)
+aROC = (aData(:,1)-aData(:,4))/10;
+bROC = (bData(:,1)-bData(:,4))/10;
+
+%Get difference from mean size as of day 0
+aMean = mean(aData(:,1));
+bMean = mean(bData(:,1));
+
+aDif = (aData(:,1)-aMean)./aMean;
+bDif = (bData(:,1)-bMean)./bMean;
+
+%Scatter roc vs difference
+scatter(aDif,aROC,25,'b','filled');
+scatter(bDif,bROC,25,'r','filled');
+lsr = lsline;
+set(lsr(1),'Color','b');
+set(lsr(2),'Color','r');
+set(lsr(1),'LineWidth',2);
+set(lsr(2),'LineWidth',2);
+ylim([min([aROC;bROC])*1.05 max([aROC;bROC])*1.05]);
+xlim([min([aDif;bDif])*1.05 max([aDif;bDif])*1.05]);
+xlabel('% Difference from mean');
+ylabel('Rate of Change per Day');
+title('Difference vs Rate of Change');
     %% Save figures
 
 % saveFolder = 0;
@@ -579,11 +647,6 @@ else
         close(h);
     end
 end
-
-
-
-
-
 
 
 
